@@ -254,12 +254,19 @@ def create_review_comment(
     repo = gh.get_repo(f"{owner}/{repo}")
     pr = repo.get_pull(pull_number)
     try:
-        # Create the review with only the required fields
+        if comments:
+            body = "Code Reviewer Comments"
+            event = "COMMENT"
+        else:
+            body = "✅ Review complete: 개선사항이 없습니다."
+            event = "COMMENT" 
+
         review = pr.create_review(
-            body="Gemini AI Code Reviewer Comments",
+            body=body,
             comments=comments,
-            event="COMMENT"
+            event=event
         )
+        
         print(f"Review created successfully with ID: {review.id}")
 
     except Exception as e:
@@ -351,6 +358,13 @@ def main():
                 )
             except Exception as e:
                 print("Error in create_review_comment:", e)
+        else:
+            create_review_comment(
+                pr_details.owner,
+                pr_details.repo,
+                pr_details.pull_number,
+                comments=[],  # 빈 리스트
+            )
     else:
         print("Unsupported event:", os.environ.get("GITHUB_EVENT_NAME"))
         return
